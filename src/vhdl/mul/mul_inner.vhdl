@@ -11,8 +11,8 @@ entity mul_inner is
 end mul_inner;
 
 architecture arch_mul_inner of mul_inner is
-    constant zero : std_logic_vector := '0000000000000000000000000000000';
-    constant infty : std_logic_vector := '1111111100000000000000000000000';
+    constant zero : std_logic_vector := "0000000000000000000000000000000";
+    constant infty : std_logic_vector := "1111111100000000000000000000000";
 
     signal sig_out : bit;
     signal exp_a : integer range 0 to 255;
@@ -33,8 +33,8 @@ begin
     elsif exp_sum < 0 then
         num_out <= sig_out & zero;
     else
-        mant_a <= to_integer(unsigned('1' & num_a(22 downto 0)));
-        mant_b <= to_integer(unsigned('1' & num_b(22 downto 0)));
+        mant_a <= to_integer(unsigned("1" & num_a(22 downto 0)));
+        mant_b <= to_integer(unsigned("1" & num_b(22 downto 0)));
         mant_prod <= mant_a * mant_b;
         mant_prod_vec <= std_logic_vector(to_unsigned(mant_prod)) srl 23;
         if mant_prod_vec(24) then

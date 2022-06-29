@@ -11,7 +11,7 @@ entity add_inner is
 end add_inner;
 
 architecture arch_add_inner of add_inner is
-    constant infty : std_logic_vector := '1111111100000000000000000000000';
+    constant infty : std_logic_vector := "1111111100000000000000000000000";
 
     signal exp_a : integer range 0 to 255;
     signal exp_b : integer range 0 to 255;
@@ -27,17 +27,17 @@ begin
     exp_b <= to_integer(unsigned(num_b(30 downto 23)));
     if exp_a > exp_b then
         exp_diff <= exp_a - exp_b;
-        mant_a <= to_integer(unsigned('1' & num_a(22 downto 0)));
-        mant_b <= to_integer(unsigned(('1' & num_b(22 downto 0)) srl exp_diff));
+        mant_a <= to_integer(unsigned("1" & num_a(22 downto 0)));
+        mant_b <= to_integer(unsigned(("1" & num_b(22 downto 0)) srl exp_diff));
         exp_max <= exp_a;
     elsif exp_b > exp_a then
         exp_diff <= exp_b - exp_a;
-        mant_a <= to_integer(unsigned(('1' & num_a(22 downto 0)) srl exp_diff));
-        mant_b <= to_integer(unsigned('1' & num_b(22 downto 0)));
+        mant_a <= to_integer(unsigned(("1" & num_a(22 downto 0)) srl exp_diff));
+        mant_b <= to_integer(unsigned("1" & num_b(22 downto 0)));
         exp_max <= exp_b;
     else
-        mant_a <= to_integer(unsigned('1' & num_a(22 downto 0)));
-        mant_b <= to_integer(unsigned('1' & num_b(22 downto 0)));
+        mant_a <= to_integer(unsigned("1" & num_a(22 downto 0)));
+        mant_b <= to_integer(unsigned("1" & num_b(22 downto 0)));
         exp_max <= exp_a;
     end if;
 

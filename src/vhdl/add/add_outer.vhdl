@@ -11,9 +11,9 @@ entity add_outer is
 end add_outer;
 
 architecture arch_add_outer of add_outer is
-    constant zero : std_logic_vector := '0000000000000000000000000000000';
-    constant infty : std_logic_vector := '1111111100000000000000000000000';
-    constant nan : std_logic_vector := '-1111111111111111111111111111111';
+    constant zero : std_logic_vector := "0000000000000000000000000000000";
+    constant infty : std_logic_vector := "1111111100000000000000000000000";
+    constant nan : std_logic_vector := "-1111111111111111111111111111111";
 
     signal add_num_a, add_num_b, add_output : std_logic_vector(31 downto 0);
 begin

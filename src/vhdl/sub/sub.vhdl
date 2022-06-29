@@ -17,7 +17,7 @@ begin
     a: entity work.add_outer port map (add_num_a, add_num_b, add_output);
     s: entity work.sub_outer port map (sub_num_a, sub_num_b, sub_output);
 
-    if num_a(31) ='0' xor num_b(31) = '0' then
+    if num_a(31) xor num_b(31) then
         add_num_a <= num_a;
         add_num_b <= num_a(31) & num_b(30 downto 1);
         num_out <= add_output;

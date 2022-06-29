@@ -20,15 +20,15 @@ begin
     s: entity work.sub port map (sub_num_a, sub_num_b, sub_output);
     m: entity work.mul port map (mul_num_a, mul_num_b, mul_output);
 
-    if op = '00' then
+    if op = "00" then
         add_num_a <= num_a;
         add_num_b <= num_b;
         num_out <= add_output;
-    elsif op = '01' then
+    elsif op = "01" then
         sub_num_a <= num_a;
         sub_num_b <= num_b;
         num_out <= sub_output;
-    elsif op = '10' then
+    elsif op = "10" then
         mul_num_a <= num_a;
         mul_num_b <= num_b;
         num_out <= mul_output;
