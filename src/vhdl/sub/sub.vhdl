@@ -6,7 +6,7 @@ entity sub is
     port (
         num_a : in std_logic_vector(31 downto 0);
         num_b : in std_logic_vector(31 downto 0);
-        num_out : out std_logic_vector(31 downto 0);
+        num_out : out std_logic_vector(31 downto 0)
     );
 end sub;
 

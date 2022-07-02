@@ -6,7 +6,7 @@ entity add_inner is
     port (
         num_a : in std_logic_vector(31 downto 0);
         num_b : in std_logic_vector(31 downto 0);
-        mum_out : out std_logic_vector(31 downto 0);
+        mum_out : out std_logic_vector(31 downto 0)
     );
 end add_inner;
 

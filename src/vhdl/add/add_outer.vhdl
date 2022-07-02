@@ -6,7 +6,7 @@ entity add_outer is
     port (
         num_a : in std_logic_vector(31 downto 0);
         num_b : in std_logic_vector(31 downto 0);
-        num_out : out std_logic_vector(31 downto 0);
+        num_out : out std_logic_vector(31 downto 0)
     );
 end add_outer;
 
@@ -22,11 +22,7 @@ begin
         num_out <= nan;
     elsif num_a(30 downto 0) = infty then
         if num_b(30 downto 0) = infty then
-            if num_a(31) = num_b(31) then
-                num_out <= num_a;
-            else
-                num_out <= nan;
-            end if;
+            num_out <= nan;
         else
             num_out <= num_a;
         end if;

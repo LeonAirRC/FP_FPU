@@ -6,7 +6,7 @@ entity mul_inner is
     port (
         num_a : in std_logic_vector(31 downto 0);
         num_b : in std_logic_vector(31 downto 0);
-        num_out : out std_logic_vector(31 downto 0);
+        num_out : out std_logic_vector(31 downto 0)
     );
 end mul_inner;
 
@@ -14,7 +14,7 @@ architecture arch_mul_inner of mul_inner is
     constant zero : std_logic_vector := "0000000000000000000000000000000";
     constant infty : std_logic_vector := "1111111100000000000000000000000";
 
-    signal sig_out : bit;
+    signal sig_out : std_logic;
     signal exp_a : integer range 0 to 255;
     signal exp_b : integer range 0 to 255;
     signal exp_sum : integer range -127 to 511;
