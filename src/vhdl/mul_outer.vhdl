@@ -18,25 +18,28 @@ architecture arch_mul_outer of mul_outer is
     signal mul_num_a, mul_num_b, mul_output : std_logic_vector(31 downto 0);
 begin
     a : entity work.mul_inner port map (mul_num_a, mul_num_b, mul_output);
-    if num_a = nan or num_b = nan then
-        num_out <= nan;
-    elsif num_a(30 downto 0) = infty then
-        if num_b(30 downto 0) = zero then
+    process( num_a, num_b )
+    begin
+        if num_a = nan or num_b = nan then
             num_out <= nan;
+        elsif num_a(30 downto 0) = infty then
+            if num_b(30 downto 0) = zero then
+                num_out <= nan;
+            else
+                num_out <= (num_a(31) xor num_b(31)) & infty;
+            end if;
+        elsif num_b(30 downto 0) = infty then
+            if num_a(30 downto 0) = zero then
+                num_out <= nan;
+            else
+                num_out <= (num_a(31) xor num_b(31)) & infty;
+            end if;
+        elsif num_a(30 downto 0) = zero or num_b(30 downto 0) = zero then
+            num_out <= (num_a(31) xor num_b(31)) & zero;
         else
-            num_out <= (num_a(31) xor num_b(31)) & infty;
+            mul_num_a <= num_a;
+            mul_num_b <= num_b;
+            num_out <= mul_output;
         end if;
-    elsif num_b(30 downto 0) = infty then
-        if num_a(30 downto 0) = zero then
-            num_out <= nan;
-        else
-            num_out <= (num_a(31) xor num_b(31)) & infty;
-        end if;
-    elsif num_a(30 downto 0) = zero or num_b(30 downto 0) = zero then
-        num_out <= (num_a(31) xor num_b(31)) & zero;
-    else
-        mul_num_a <= num_a;
-        mul_num_b <= num_b;
-        num_out <= mul_output;
-    end if;
+    end process;
 end architecture;

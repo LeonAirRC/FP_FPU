@@ -18,23 +18,26 @@ architecture arch_add_outer of add_outer is
     signal add_num_a, add_num_b, add_output : std_logic_vector(31 downto 0);
 begin
     a : entity work.add_inner port map (add_num_a, add_num_b, add_output);
-    if num_a = nan or num_b = nan then
-        num_out <= nan;
-    elsif num_a(30 downto 0) = infty then
-        if num_b(30 downto 0) = infty then
+    process( num_a, num_b )
+    begin
+        if num_a = nan or num_b = nan then
             num_out <= nan;
-        else
+        elsif num_a(30 downto 0) = infty then
+            if num_b(30 downto 0) = infty then
+                num_out <= nan;
+            else
+                num_out <= num_a;
+            end if;
+        elsif num_b(30 downto 0) = infty then
+            num_out <= num_b;
+        elsif num_b(30 downto 0) = zero then
             num_out <= num_a;
+        elsif num_a(30 downto 0) = zero then
+            num_out <= num_b;
+        else
+            add_num_a <= num_a;
+            add_num_b <= num_b;
+            num_out <= add_output;
         end if;
-    elsif num_b(30 downto 0) = infty then
-        num_out <= num_b;
-    elsif num_b(30 downto 0) = zero then
-        num_out <= num_a;
-    elsif num_a(30 downto 0) = zero then
-        num_out <= num_b;
-    else
-        add_num_a <= num_a;
-        add_num_b <= num_b;
-        num_out <= add_output;
-    end if;
+    end process;
 end architecture;
