@@ -11,35 +11,25 @@ entity sub_outer is
 end sub_outer;
 
 architecture arch_sub_outer of sub_outer is
-    constant zero : std_logic_vector := "0000000000000000000000000000000";
-    constant infty : std_logic_vector := "1111111100000000000000000000000";
-    constant nan : std_logic_vector := "-1111111111111111111111111111111";
+    constant zero : std_logic_vector(30 downto 0) := "0000000000000000000000000000000";
+    constant infty : std_logic_vector(30 downto 0) := "1111111100000000000000000000000";
+    constant nan : std_logic_vector(31 downto 0) := "-1111111111111111111111111111111";
 
-    signal sub_num_a, sub_num_b, sub_output : std_logic_vector(31 downto 0);
+    signal sub_output : std_logic_vector(31 downto 0);
+    signal a_nan, b_nan, a_infty, b_infty, a_zero, b_zero : boolean;
 begin
-    a : entity work.sub_inner port map (sub_num_a, sub_num_b, sub_output);
-    process( num_a, num_b )
-    begin
-        if num_a = nan or num_b = nan then
-            num_out <= nan;
-        elsif num_a(30 downto 0) = infty then
-            if num_b(30 downto 0) = infty then
-                num_out <= nan;
-            else
-                num_out <= num_a;
-            end if;
-        elsif num_b(30 downto 0) = infty then
-            num_out <= (not num_b(31)) & num_b(30 downto 0);
-        elsif num_b(30 downto 0) = zero then
-            num_out <= num_a;
-        elsif num_a(30 downto 0) = zero then
-            num_out <= (not num_b(31)) & num_b(30 downto 0);
-        elsif num_a = num_b then
-            num_out <= "0" & zero;
-        else
-            sub_num_a <= num_a;
-            sub_num_b <= num_b;
-            num_out <= sub_output;
-        end if;
-    end process;
+    a : entity work.sub_inner port map (num_a, num_b, sub_output);
+
+    a_nan <= num_a(30 downto 23) = "11111111" and num_a(22 downto 0) /= "0";
+    b_nan <= num_b(30 downto 23) = "11111111" and num_b(22 downto 0) /= "0";
+    a_infty <= num_a(30 downto 0) = infty;
+    b_infty <= num_b(30 downto 0) = infty;
+    a_zero <= num_a(30 downto 0) = zero;
+    b_zero <= num_b(30 downto 0) = zero;
+    num_out <=  nan                                     when (a_nan or b_nan or (a_infty and b_infty)) else -- Sonderfälle abfangen
+                num_a                                   when (a_infty or b_zero) else
+                num_b                                   when (b_infty or a_zero) else
+                (not num_b(31)) & num_b(30 downto 0)    when (b_infty or a_zero) else -- (-num_b), falls b unendlich oder a null
+                ("0" & zero)                            when (num_a = num_b) else -- null, falls num_a = num_b
+                sub_output;
 end architecture;

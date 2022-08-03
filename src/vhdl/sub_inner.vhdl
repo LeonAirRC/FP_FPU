@@ -11,67 +11,44 @@ entity sub_inner is
 end sub_inner;
 
 architecture arch_sub_inner of sub_inner is
-    constant zero : std_logic_vector := "00000000000000000000000000000000";
-    signal sig_out : std_logic;
+    constant zero : std_logic_vector(31 downto 0) := "00000000000000000000000000000000";
+    signal sign_out : std_logic;
     signal exp_a, exp_b : unsigned(7 downto 0);
     signal exp_max : unsigned(7 downto 0);
     signal mant_a, mant_b : unsigned(24 downto 0);
     signal mant_a_impl, mant_b_impl : unsigned(24 downto 0);
     signal mant_b_comp : unsigned(24 downto 0);
-    signal mant_sum : unsigned(24 downto 0);
-    signal mant_sum_comp : unsigned(24 downto 0);
-    signal mant_sum_impl : unsigned(23 downto 0);
+    signal mant_diff : unsigned(24 downto 0);
+    signal mant_diff_comp : unsigned(24 downto 0);
+    signal mant_diff_impl : unsigned(23 downto 0);
     signal shift_amt : integer range 0 to 23 := 0;
     signal exp_out : unsigned(7 downto 0);
-    signal exp_out_vec : std_logic_vector(7 downto 0);
     signal mant_out : std_logic_vector(23 downto 0);
+    signal exp_a_bigger, exp_equal : boolean;
 begin
-    process( num_a, num_b )
-    begin
-        exp_a <= unsigned(num_a(30 downto 23));
-        exp_b <= unsigned(num_b(30 downto 23));
-        mant_a_impl <= unsigned("01" & num_a(22 downto 0));
-        mant_b_impl <= unsigned("01" & num_b(22 downto 0));
-        if exp_a > exp_b then
-            mant_a <= mant_a_impl;
-            mant_b <= mant_b_impl srl to_integer(exp_a - exp_b);
-            exp_max <= exp_a;
-        elsif exp_b > exp_a then
-            mant_a <= mant_a_impl srl to_integer(exp_b - exp_a);
-            mant_b <= mant_b_impl;
-            exp_max <= exp_b;
-        else
-            mant_a <= mant_a_impl;
-            mant_b <= mant_b_impl;
-            exp_max <= exp_a;
-        end if;
+    s : entity work.shift_amount port map (mant_diff_impl, shift_amt);
 
-        mant_b_comp <= (not mant_b) + 1;
-        mant_sum <= mant_a + mant_b_comp;
-        sig_out <= num_a(31) xor mant_sum(24);
-        if mant_sum(24) = '1' then
-            mant_sum_comp <= (not mant_sum) + 1;
-            mant_sum_impl <= mant_sum_comp(23 downto 0);
-        else
-            mant_sum_impl <= mant_sum(23 downto 0);
-        end if;
-        if mant_sum_impl = "0" then
-            num_out <= zero;
-        else
-            for i in 23 downto 0 loop
-                if mant_sum_impl(i) = '1' then
-                    shift_amt <= 23 - i;
-                    exit;
-                end if;
-            end loop;
-            if exp_max < shift_amt then
-                num_out <= zero;
-            else
-                exp_out <= exp_max - shift_amt;
-                exp_out_vec <= std_logic_vector(exp_out);
-                mant_out <= std_logic_vector(mant_sum_impl sll shift_amt);
-                num_out <= sig_out & exp_out_vec & mant_out(22 downto 0);
-            end if;
-        end if;
-    end process;
+    exp_a <= unsigned(num_a(30 downto 23)); -- Exponenten extrahieren
+    exp_b <= unsigned(num_b(30 downto 23));
+    exp_equal <= exp_a = exp_b;
+    exp_a_bigger <= exp_a > exp_b;
+    mant_a_impl <= unsigned("01" & num_a(22 downto 0)); -- Mantissen extrahieren und um implizite 1 erweitern
+    mant_b_impl <= unsigned("01" & num_b(22 downto 0)); -- da bei der Subtraktion ein Overflow möglich ist, wird vor der 1 eine 0 angehängt
+    mant_a <= mant_a_impl when (exp_equal or exp_a_bigger) else (mant_a_impl srl to_integer(exp_b - exp_a)); -- Mantissen auf grössten Exponenten normalisieren
+    mant_b <= (mant_b_impl srl to_integer(exp_a - exp_b)) when exp_a_bigger else mant_b_impl;
+    exp_max <= exp_a when exp_a_bigger else exp_b; -- grösster der beiden Exponenten
+
+    mant_b_comp <= (not mant_b) + 1; -- Zweierkomplement von mant_b
+    mant_diff <= mant_a + mant_b_comp; -- Differenz von mant_a und mant_b
+    sign_out <= num_a(31) xor mant_diff(24); -- Vorzeichen des Ergebnisses ist das von num_a, falls Differenz der Mantissen positiv; ansonsten wird invertiert
+
+    mant_diff_comp <= (not mant_diff) + 1; -- Zweierkomplement der Differenz
+    mant_diff_impl <=   mant_diff_comp(23 downto 0) when mant_diff(24) = '1' else -- falls Differenz negativ -> Zweierkomplement nutzen und auf eine Stelle vor dem Komma kürzen
+                        mant_diff(23 downto 0); -- sonst Differenz unverändert nutzen und auf eine Stelle vor dem Komma kürzen
+    
+    exp_out <= exp_max - shift_amt; -- Exponent normalisieren
+    mant_out <= std_logic_vector(mant_diff_impl sll shift_amt); -- Mantisse normalisieren
+
+    num_out <=  zero        when (mant_diff_impl = "0" or exp_max <= shift_amt) else -- falls Mantisse null oder Exponent zu klein -> null
+                sign_out & std_logic_vector(exp_out) & mant_out(22 downto 0); -- sonst Ergebnis zusammensetzen; implizite 1 wird entfernt
 end architecture;

@@ -12,28 +12,13 @@ entity alu is
 end alu;
 
 architecture arch_alu of alu is
-    signal add_num_a, add_num_b, add_output : std_logic_vector(31 downto 0);
-    signal sub_num_a, sub_num_b, sub_output : std_logic_vector(31 downto 0);
-    signal mul_num_a, mul_num_b, mul_output : std_logic_vector(31 downto 0);
+    signal add_output, sub_output, mul_output : std_logic_vector(31 downto 0);
 begin
-    a: entity work.add port map (add_num_a, add_num_b, add_output);
-    s: entity work.sub port map (sub_num_a, sub_num_b, sub_output);
-    m: entity work.mul_inner port map (mul_num_a, mul_num_b, mul_output);
+    a: entity work.add port map (num_a, num_b, add_output);
+    s: entity work.sub port map (num_a, num_b, sub_output);
+    m: entity work.mul_outer port map (num_a, num_b, mul_output);
 
-    process( op, num_a, num_b )
-    begin
-        if op = "00" then
-            add_num_a <= num_a;
-            add_num_b <= num_b;
-            num_out <= add_output;
-        elsif op = "01" then
-            sub_num_a <= num_a;
-            sub_num_b <= num_b;
-            num_out <= sub_output;
-        elsif op = "10" then
-            mul_num_a <= num_a;
-            mul_num_b <= num_b;
-            num_out <= mul_output;
-        end if;
-    end process;
+    num_out <=  add_output when (op = "00") else
+                sub_output when (op = "01") else
+                mul_output;
 end arch_alu;
