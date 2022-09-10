@@ -6,7 +6,8 @@ entity sub_inner is
     port (
         num_a : in std_logic_vector(31 downto 0);
         num_b : in std_logic_vector(31 downto 0);
-        num_out : out std_logic_vector(31 downto 0)
+        num_out : out std_logic_vector(31 downto 0);
+        exc : out std_logic_vector(4 downto 0)
     );
 end sub_inner;
 
@@ -24,7 +25,9 @@ architecture arch_sub_inner of sub_inner is
     signal shift_amt : integer range 0 to 23 := 0;
     signal exp_out : unsigned(7 downto 0);
     signal mant_out : std_logic_vector(23 downto 0);
-    signal exp_a_bigger, exp_equal : boolean;
+    signal exp_a_bigger, exp_equal, underflow : boolean;
+    signal trimmed_suffix : unsigned(24 downto 0);
+    signal underflow_bit, inexact_bit : std_logic;
 begin
     s : entity work.shift_amount port map (mant_diff_impl, shift_amt);
 
@@ -36,6 +39,7 @@ begin
     mant_b_impl <= unsigned("01" & num_b(22 downto 0)); -- da bei der Subtraktion ein Overflow möglich ist, wird vor der 1 eine 0 angehängt
     mant_a <= mant_a_impl when (exp_equal or exp_a_bigger) else (mant_a_impl srl to_integer(exp_b - exp_a)); -- Mantissen auf grössten Exponenten normalisieren
     mant_b <= (mant_b_impl srl to_integer(exp_a - exp_b)) when exp_a_bigger else mant_b_impl;
+    trimmed_suffix <= (mant_b_impl sll to_integer(25 + exp_b - exp_a)) when exp_a_bigger else (mant_a_impl sll to_integer(25 + exp_a - exp_b));
     exp_max <= exp_a when exp_a_bigger else exp_b; -- grösster der beiden Exponenten
 
     mant_b_comp <= (not mant_b) + 1; -- Zweierkomplement von mant_b
@@ -48,7 +52,12 @@ begin
     
     exp_out <= exp_max - shift_amt; -- Exponent normalisieren
     mant_out <= std_logic_vector(mant_diff_impl sll shift_amt); -- Mantisse normalisieren
+    underflow <= mant_diff_impl = "0" or exp_max <= shift_amt;
 
-    num_out <=  zero        when (mant_diff_impl = "0" or exp_max <= shift_amt) else -- falls Mantisse null oder Exponent zu klein -> null
+    num_out <=  zero        when (underflow) else -- falls Mantisse null oder Exponent zu klein -> null
                 sign_out & std_logic_vector(exp_out) & mant_out(22 downto 0); -- sonst Ergebnis zusammensetzen; implizite 1 wird entfernt
+
+    underflow_bit <= '1' when underflow else '0';
+    inexact_bit <= '1' when trimmed_suffix /= "0" else '0';
+    exc <= "000" & underflow_bit & inexact_bit;
 end architecture;

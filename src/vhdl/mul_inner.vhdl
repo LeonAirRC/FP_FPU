@@ -6,7 +6,8 @@ entity mul_inner is
     port (
         num_a : in std_logic_vector(31 downto 0);
         num_b : in std_logic_vector(31 downto 0);
-        num_out : out std_logic_vector(31 downto 0)
+        num_out : out std_logic_vector(31 downto 0);
+        exc : out std_logic_vector(4 downto 0)
     );
 end mul_inner;
 
@@ -22,7 +23,8 @@ architecture arch_mul_inner of mul_inner is
     signal mant_prod_vec : std_logic_vector(24 downto 0);
     signal mant_out : std_logic_vector(22 downto 0);
     signal exp_out : signed(9 downto 0);
-    signal mant_prod_overflow, exp_out_gt254, exp_out_lt0 : boolean;
+    signal mant_prod_overflow, exp_out_gt254, exp_out_lt0, overflow, underflow : boolean;
+    signal overflow_bit, underflow_bit, inexact_bit : std_logic;
 begin
     sig_out <= num_a(31) xor num_b(31); -- Vorzeichenbit des Ergebnisses
     exp_a <= "00" & unsigned(num_a(30 downto 23)); -- Exponenten extrahieren; zwei 0 werden angehängt, um den benötigten Zahlenbereich -127 bis 508 abzudecken
@@ -39,8 +41,15 @@ begin
     mant_out <= mant_prod_vec(23 downto 1) when mant_prod_overflow else mant_prod_vec(22 downto 0); -- falls Overflow: Mantisse 'eine Stelle nach rechts verschieben'; implizite 1 wird entfernt
     exp_out_gt254 <= exp_out(8) = '1' and exp_out(7 downto 0) = "11111111"; -- ist Exponent grösser als 254?
     exp_out_lt0 <= exp_out(9) = '1'; -- ist Exponent negativ?
+    overflow <= exp_out_gt254 or (exp_out = 254 and mant_prod_overflow);
+    underflow <= exp_out_lt0 or (not mant_prod_overflow and exp_out = 0);
 
-    num_out <=  sig_out & infty    when (exp_out_gt254 or (exp_out = 254 and mant_prod_overflow)) else -- Exponent zu gross oder Exponent maximal und Overflow aufgetreten -> unendlich
-                sig_out & zero     when (exp_out_lt0 or (not mant_prod_overflow and exp_out = 0)) else -- Exponent negativ oder kein Overflow und Exponent ist 0 -> null
-                sig_out & std_logic_vector(exp_out(7 downto 0)) & mant_out;                            -- kein Sonderfall -> Ergebnis zusammensetzen
+    num_out <=  sig_out & infty    when overflow    else                    -- Exponent zu gross oder Exponent maximal und Overflow aufgetreten -> unendlich
+                sig_out & zero     when underflow   else                    -- Exponent negativ oder kein Overflow und Exponent ist 0 -> null
+                sig_out & std_logic_vector(exp_out(7 downto 0)) & mant_out; -- kein Sonderfall -> Ergebnis zusammensetzen
+
+    overflow_bit <= '1' when overflow else '0';
+    underflow_bit <= '1' when underflow else '0';
+    inexact_bit <= '1' when (mant_prod(22 downto 0) /= "0" or (mant_prod_overflow and mant_prod_vec(0) = '1')) else '0';
+    exc <= "00" & overflow_bit & underflow_bit & inexact_bit;
 end architecture;

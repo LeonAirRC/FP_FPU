@@ -6,7 +6,8 @@ entity mul_outer is
     port (
         num_a : in std_logic_vector(31 downto 0);
         num_b : in std_logic_vector(31 downto 0);
-        num_out : out std_logic_vector(31 downto 0)
+        num_out : out std_logic_vector(31 downto 0);
+        exc : out std_logic_vector(4 downto 0)
     );
 end mul_outer;
 
@@ -17,8 +18,9 @@ architecture arch_mul_outer of mul_outer is
 
     signal mul_output : std_logic_vector(31 downto 0);
     signal a_nan, b_nan, a_infty, b_infty, a_zero, b_zero : boolean;
+    signal mul_exc : std_logic_vector(4 downto 0);
 begin
-    a : entity work.mul_inner port map (num_a, num_b, mul_output);
+    a : entity work.mul_inner port map (num_a, num_b, mul_output, mul_exc);
 
     a_nan <= num_a(30 downto 23) = "11111111" and num_a(22 downto 0) /= "0";
     b_nan <= num_b(30 downto 23) = "11111111" and num_b(22 downto 0) /= "0";

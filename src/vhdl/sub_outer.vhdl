@@ -6,7 +6,8 @@ entity sub_outer is
     port (
         num_a : in std_logic_vector(31 downto 0);
         num_b : in std_logic_vector(31 downto 0);
-        num_out : out std_logic_vector(31 downto 0)
+        num_out : out std_logic_vector(31 downto 0);
+        exc : out std_logic_vector(4 downto 0)
     );
 end sub_outer;
 
