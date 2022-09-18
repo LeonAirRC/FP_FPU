@@ -33,11 +33,10 @@ begin
     exp_a <= "00" & unsigned(num_a(30 downto 23)); -- Exponenten extrahieren; zwei 0 werden angehängt, um den benötigten Zahlenbereich -127 bis 508 abzudecken
     exp_b <= "00" & unsigned(num_b(30 downto 23));
     exp_sum <= signed(exp_a + exp_b) - 127; -- Exponenten addieren und überflüssiges Bias abziehen
-
     mant_a <= unsigned("1" & num_a(22 downto 0)); -- Mantissen mit impliziter 1 extrahieren
     mant_b <= unsigned("1" & num_b(22 downto 0));
     mant_prod <= mant_a * mant_b; -- Multiplikation der Mantissen
-    mant_prod_rnd <=    mant_prod(47 downto 23) + 1 -- resultierende Mantisse inklusive zwei Stellen vor dem Komma aus Produkt extrahieren
+    mant_prod_rnd <=    mant_prod(47 downto 23) + 1 -- resultierende Mantisse inklusive zwei Stellen vor dem Komma aus Produkt extrahieren; aufrunden, falls:
                             when    (rnd = "000" and mant_prod(22) = '1' and (mant_prod(21 downto 0) /= "0" or mant_prod(23) = '1'))
                             or      (rnd = "001" and mant_prod(22) = '1')
                             or      (rnd = "011" and sig_out = '0' and mant_prod(22 downto 0) /= "0")
