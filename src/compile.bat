@@ -7,5 +7,5 @@ ghdl -a vhdl/add.vhdl
 ghdl -a vhdl/sub.vhdl
 ghdl -a vhdl/mul_inner.vhdl
 ghdl -a vhdl/mul_outer.vhdl
-ghdl -a vhdl/alu.vhdl
-ghdl -a vhdl/test_alu.vhdl
+ghdl -a vhdl/au.vhdl
+ghdl -a vhdl/test_au.vhdl

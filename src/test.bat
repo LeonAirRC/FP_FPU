@@ -1,3 +1,3 @@
-ghdl -e test_alu
-ghdl -r test_alu --vcd=test_alu.vcd
-gtkwave test_alu.vcd
+ghdl -e test_au
+ghdl -r test_au --vcd=test_au.vcd
+gtkwave test_au.vcd

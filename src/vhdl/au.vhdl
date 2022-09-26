@@ -4,7 +4,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-entity alu is
+entity au is
     port (
         op : in std_logic_vector(1 downto 0);
         num_a : in std_logic_vector(31 downto 0);
@@ -13,9 +13,9 @@ entity alu is
         num_out : out std_logic_vector(31 downto 0);
         exc : out std_logic_vector(4 downto 0)
     );
-end alu;
+end au;
 
-architecture arch_alu of alu is
+architecture arch_au of au is
     signal add_output, sub_output, mul_output : std_logic_vector(31 downto 0);
     signal add_exc, sub_exc, mul_exc : std_logic_vector(4 downto 0);
 begin
@@ -29,4 +29,4 @@ begin
     exc <=  add_exc when (op = "00") else
             sub_exc when (op = "01") else
             mul_exc;
-end arch_alu;
+end arch_au;
