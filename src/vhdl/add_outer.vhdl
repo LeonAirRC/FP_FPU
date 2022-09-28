@@ -31,9 +31,9 @@ begin
     b_infty <= num_b(30 downto 0) = infty;
     a_zero <= num_a(30 downto 0) = zero;
     b_zero <= num_b(30 downto 0) = zero;
-    num_out <=  nan         when (a_nan or b_nan or (a_infty and b_infty)) else -- Sonderfälle abfangen
-                num_a       when (a_infty or b_zero) else
-                num_b       when (b_infty or a_zero) else
+    num_out <=  nan                 when (a_nan or b_nan or (a_infty and b_infty and num_a(31) /= num_b(31))) else -- Sonderfälle abfangen
+                num_a               when (a_infty or b_zero) else
+                num_b               when (b_infty or a_zero) else
                 add_output;
     exc <=  "00000" when (a_nan or b_nan or a_infty or b_infty or a_zero or b_zero) else
             add_exc;

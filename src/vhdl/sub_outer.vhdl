@@ -32,7 +32,7 @@ begin
     a_zero <= num_a(30 downto 0) = zero;
     b_zero <= num_b(30 downto 0) = zero;
     equal <= num_a = num_b;
-    num_out <=  nan                                     when (a_nan or b_nan or (a_infty and b_infty)) else -- Sonderfälle abfangen
+    num_out <=  nan                                     when (a_nan or b_nan or (a_infty and b_infty and num_a(31) = num_b(31))) else -- Sonderfälle abfangen
                 num_a                                   when (a_infty or b_zero) else
                 num_b                                   when (b_infty or a_zero) else
                 (not num_b(31)) & num_b(30 downto 0)    when (b_infty or a_zero) else                       -- -(num_b), falls b unendlich oder a null
