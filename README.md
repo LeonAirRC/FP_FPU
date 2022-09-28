@@ -1,5 +1,13 @@
 ## Floating-Point Arithmetic Unit
 
-compile: `src/compile.bat`
+compile:
+```
+> cd src
+> compile.bat
+```
 
-tests: `src/test.bat`
+tests:
+```
+> cd src
+> test.bat
+```
